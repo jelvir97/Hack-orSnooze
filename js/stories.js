@@ -25,7 +25,7 @@ function generateStoryMarkup(story) {
   const hostName = story.getHostName();
   return $(`
       <li id="${story.storyId}">
-        <span>&#9734;</span>
+        <span class="star">&#9734;</span>
         <div class="story-info">
           <a href="${story.url}" target="a_blank" class="story-link">
             ${story.title}
@@ -36,7 +36,6 @@ function generateStoryMarkup(story) {
           <div class="story-user">posted by ${story.username}</div>
         </div>
       </li>
-      <hr>
     `);
 }
 
@@ -55,7 +54,7 @@ function putStoriesOnPage() {
     $allStoriesList.append($story);
 
     const $id = $story.attr('id')
-    const $star = $(`#${$id} span`)
+    const $star = $(`#${$id} .star`)
     if(currentUser && checkFavorite($id)){
       $star.addClass('favorite')
       $star.html('&#9733;')
@@ -75,7 +74,7 @@ function putFavoritesOnPage() {
     $favoriteStoriesList.append($story);
 
     const $id = $story.attr('id')
-    const $star = $(`#favorite-stories-list #${$id} span`)
+    const $star = $(`#favorite-stories-list #${$id} .star`)
 
     if(checkFavorite($id)){
       $star.addClass('favorite')
@@ -93,10 +92,11 @@ function putUserStoriesOnPage(userStoryList) {
   // loop through all of our stories and generate HTML for them
   for (let story of userStoryList) {
     const $story = generateStoryMarkup(story);
-    $userStoriesList.append($story);
-    $story.append('<button>Remove</buttom')
+    $story.prepend('<span class="trash"><img src="icons8-delete-trash-96.png"></span>')
+    $userStoriesList.append($story); 
+
     const $id = $story.attr('id')
-    const $star = $(`#user-stories-list #${$id} span`)
+    const $star = $(`#user-stories-list #${$id} .star`)
     console.log($star);
     if(checkFavorite($id)){
       $star.addClass('favorite')
@@ -122,39 +122,40 @@ async function handleFavoriteClick(evt){
   const targetID = evt.target.parentElement.id;
 
   if(checkFavorite(targetID)){
-    await currentUser.removeFavoriteStory(targetID)
     $(evt.target).removeClass('favorite')
     $(evt.target).html('&#9734;')
+    await currentUser.removeFavoriteStory(targetID)
   }else{
-    await currentUser.addFavoriteStory(targetID)
     $(evt.target).addClass('favorite')
     $(evt.target).html('&#9733;')
+    await currentUser.addFavoriteStory(targetID)
   }
 }
 
-$allStoriesList.on('click','span', handleFavoriteClick)
+$allStoriesList.on('click','.star', handleFavoriteClick)
 
-$favoriteStoriesList.on('click','span', async function(evt){
+$favoriteStoriesList.on('click','.star', async function(evt){
   await handleFavoriteClick(evt)
   putFavoritesOnPage()
 })
 
-$userStoriesList.on('click','span', async function(evt){
+$userStoriesList.on('click','.star', async function(evt){
   await handleFavoriteClick(evt)
   userStories();
 })
 
 async function handleRemoveStoryClick(evt){
   evt.preventDefault();
-  const id = evt.target.parentElement.id;
+  const id = evt.target.parentElement.parentElement.id;
   await storyList.removeStory(id);
   storyList = await StoryList.getStories();
   userStories();
 }
-$userStoriesList.on('click', 'button', handleRemoveStoryClick);
+$userStoriesList.on('click', '.trash', handleRemoveStoryClick);
 
 function checkFavorite(id){
   const favIds = currentUser.favorites.map(story => story.storyId)
+  // to-do
   return favIds.includes(id);
 }
 

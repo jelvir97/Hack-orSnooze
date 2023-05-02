@@ -24,8 +24,8 @@ class Story {
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+    const url = new URL(this.url)
+    return url.hostname;
   }
 }
 
@@ -73,18 +73,17 @@ class StoryList {
    * Returns the new Story instance
    */
 
-  async addStory(user, newStory ) {
-    const postResponse = await axios.post(`${BASE_URL}/stories`,{token: user.loginToken, story: newStory})
-    this.stories.unshift(new Story(postResponse.data.story))
+  async addStory(user, story) {
+    const { data } = await axios.post(`${BASE_URL}/stories`, { token: user.loginToken, story })
+    this.stories.unshift(new Story(data.story))
   }
 
-  async removeStory(id){
-      const res = await axios({
-       method: "DELETE",
-        url:`${BASE_URL}/stories/${id}`,
-        data:{token: currentUser.loginToken},
-      })
-      console.log(res);
+  async removeStory(id) {
+    await axios({
+      method: "DELETE",
+      url: `${BASE_URL}/stories/${id}`,
+      data: { token: currentUser.loginToken },
+    })
   }
 }
 
@@ -100,13 +99,13 @@ class User {
    */
 
   constructor({
-                username,
-                name,
-                createdAt,
-                favorites = [],
-                ownStories = []
-              },
-              token) {
+    username,
+    name,
+    createdAt,
+    favorites = [],
+    ownStories = []
+  },
+    token) {
     this.username = username;
     this.name = name;
     this.createdAt = createdAt;
@@ -207,29 +206,29 @@ class User {
   // user can set stories as favorites;
   // Makes post request to add to favorites on API
   // adds story to local user's favorites
-  async addFavoriteStory(id){
+  async addFavoriteStory(id) {
     console.log(`${BASE_URL}/users/${this.username}/favorites/${id}`);
     const res = await axios({
-     method: "POST",
-      url:`${BASE_URL}/users/${this.username}/favorites/${id}`,
-      data:{token: this.loginToken}
+      method: "POST",
+      url: `${BASE_URL}/users/${this.username}/favorites/${id}`,
+      data: { token: this.loginToken }
     })
     console.log(res.data.user.favorites)
-    
+
     this.favorites = res.data.user.favorites.map(story => new Story(story));
-    console.log(res,this.favorites);
+    console.log(res, this.favorites);
   }
 
-  async removeFavoriteStory(id){
+  async removeFavoriteStory(id) {
     console.log(`${BASE_URL}/users/${this.username}/favorites/${id}`);
     const res = await axios({
-     method: "DELETE",
-      url:`${BASE_URL}/users/${this.username}/favorites/${id}`,
-      data:{token: this.loginToken}
+      method: "DELETE",
+      url: `${BASE_URL}/users/${this.username}/favorites/${id}`,
+      data: { token: this.loginToken }
     })
-    
+
     this.favorites = res.data.user.favorites.map(story => new Story(story));
-    console.log(res,this.favorites);
+    console.log(res, this.favorites);
   }
 
 }

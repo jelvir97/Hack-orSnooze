@@ -8,6 +8,8 @@
   color: gray;
   font-size: 0.8rem;
   margin: 10px 0;
+  padding-bottom: 2px;
+  border-bottom: lightgrey 2px solid;
 }
 
 #stories-loading-msg {
@@ -43,7 +45,7 @@
 }
 
 .favorite{
-  color: lightgrey;
+  color: grey;
 }
 
 .story-info{
@@ -54,3 +56,13 @@ hr{
   color: lightgrey;
   border-top: 1.5px solid;
 }
+
+.trash{
+  display: inline;
+  
+}
+
+.trash img{
+  height: 12px;
+}
+
